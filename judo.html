@@ -85,16 +85,50 @@ function category(q){
  if(/Katame|Ne-Waza|Osae|Shime|Kansetsu|solo/.test(q)) return 'Técnicas de Solo';
  return 'Classificação das Técnicas';
 }
+
 function answer(btn,choice,correct){
- if(answered)return;answered=true;
+ if(answered)return;
+ answered=true;
+
  document.querySelectorAll('.option').forEach(b=>b.disabled=true);
+
+ // Normaliza as respostas para ignorar pontos, espaços e maiúsculas/minúsculas
+ const normalize = text => text
+   .trim()
+   .replace(/[.!?]+$/g,'')
+   .toLowerCase();
+
+ const isCorrect = normalize(choice) === normalize(correct);
+
  const fb=document.getElementById('feedback');
- if(choice===correct){score++;btn.classList.add('correct');fb.textContent='✅ Correto!';fb.classList.add('good')}
- else{btn.classList.add('wrong');document.querySelectorAll('.option').forEach(b=>{if(b.textContent===correct)b.classList.add('correct')});fb.textContent='❌ Incorreto. Resposta: '+correct;fb.classList.add('bad')}
- history.push({q:quiz[index].q,ok:choice===correct});
+
+ if(isCorrect){
+   score++;
+   btn.classList.add('correct');
+   fb.textContent='✅ Correto!';
+   fb.classList.add('good');
+ }else{
+   btn.classList.add('wrong');
+
+   document.querySelectorAll('.option').forEach(b=>{
+     if(normalize(b.textContent) === normalize(correct)){
+       b.classList.add('correct');
+     }
+   });
+
+   fb.textContent='❌ Incorreto. Resposta: '+correct;
+   fb.classList.add('bad');
+ }
+
+ history.push({
+   q:quiz[index].q,
+   ok:isCorrect
+ });
+
  document.getElementById('score').textContent=`Pontuação: ${score}`;
  document.getElementById('next').classList.add('show');
 }
+
 function nextQuestion(){index++;if(index>=quiz.length)finish();else render()}
 function finish(){
  document.getElementById('quiz').style.display='none';document.getElementById('result').style.display='block';
